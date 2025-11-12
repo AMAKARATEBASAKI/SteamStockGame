@@ -1,1 +1,3 @@
 # SteamStockGame
+
+ブランチjs-testに中間発表用のJavaScriptで作られたものを置く
