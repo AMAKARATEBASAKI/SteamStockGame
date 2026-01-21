@@ -1,0 +1,50 @@
+version: "3.9"
+
+services:
+  backend:
+    build:
+      context: ./backend
+    container_name: steam_backend
+    volumes:
+      - ./backend/src:/var/www
+    working_dir: /var/www
+    depends_on:
+      - database
+
+  nginx:
+    image: nginx:1.25.3
+    container_name: steam_nginx
+    ports:
+      - "8080:80"
+    volumes:
+      - ./backend/src:/var/www
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - backend
+
+  database:
+    image: mysql:8.0.35
+    container_name: steam_mysql
+    environment:
+      MYSQL_DATABASE: steam_stock
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: steam
+      MYSQL_PASSWORD: steam
+    volumes:
+      - db-data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: steam_frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+    working_dir: /app
+    command: npm run dev
+
+volumes:
+  db-data:

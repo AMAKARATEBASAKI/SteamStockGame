@@ -1,3 +1,2 @@
 # SteamStockGame
 
-ブランチpy-testに中間発表用のAPIはpythonでグラフはJavaScriptで作られたものを置く
