@@ -9,6 +9,18 @@ services:
     depends_on:
       - database
 
+  scheduler:
+    build:
+      context: ./backend
+    container_name: steam_scheduler
+    volumes:
+      - ./backend/src:/var/www
+    working_dir: /var/www
+    command: php artisan schedule:work
+    depends_on:
+      - database
+    restart: unless-stopped
+
   nginx:
     image: nginx:1.25.3
     container_name: steam_nginx

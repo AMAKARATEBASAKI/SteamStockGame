@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 
 use Illuminate\Support\Facades\DB;
 use App\Models\Position;
+use App\Services\SteamService;
+use App\Services\PriceService;
 
 class PositionController extends Controller
 {
@@ -19,8 +21,13 @@ class PositionController extends Controller
 
     $user = $request->user();
 
-    // 仮の株価（ダミー）
-    $price = 100;
+    //価格
+    $steamService = new SteamService();
+    $priceService = new PriceService();
+
+    $players = $steamService->getPlayerCount($data['steam_app_id']);
+    $price = $priceService->calculate($players);
+
     $total = $price * $data['amount'];
 
     DB::transaction(function () use ($user, $data, $price, $total) {
