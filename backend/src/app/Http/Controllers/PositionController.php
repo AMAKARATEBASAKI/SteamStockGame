@@ -51,4 +51,24 @@ class PositionController extends Controller
 
     return response()->json(['status' => 'ok']);
 }
+
+    public function open(Request $request)
+    {
+        $positions = Position::where('user_id', $request->user()->id)
+            ->where('status', 'open')
+            ->orderBy('buy_time', 'desc')
+            ->get();
+
+        return response()->json($positions);
+    }
+
+    public function history(Request $request)
+    {
+        $positions = Position::where('user_id', $request->user()->id)
+            ->where('status', 'closed')
+            ->orderBy('sell_time', 'desc')
+            ->get();
+
+        return response()->json($positions);
+    }
 }
