@@ -11,7 +11,7 @@ class RankingController extends Controller
 	{
 		$ranking = User::select(
             'id',
-            'player_name',
+            'name as player_name',
             'balance'
         )
         ->orderByDesc('balance')
