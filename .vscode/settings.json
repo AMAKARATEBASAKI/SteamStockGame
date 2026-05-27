@@ -1,0 +1,8 @@
+{
+    "chat.tools.terminal.autoApprove": {
+        "/^docker compose exec backend sh -c 'tail -n 300 /var/www/storage/logs/laravel\\.log'$/": {
+            "approve": true,
+            "matchCommandLine": true
+        }
+    }
+}

@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PositionController;
+use App\Http\Controllers\GameController;
 use App\Http\Controllers\RankingController;
 
 Route::get('/ping', function () {
@@ -28,3 +29,6 @@ Route::middleware('auth:sanctum')
     ->get('/positions/history', [PositionController::class, 'history']);
 
 Route::get('/ranking', [RankingController::class, 'index']);
+
+Route::middleware('auth:sanctum')
+    ->get('/games/{appid}', [GameController::class, 'show']);

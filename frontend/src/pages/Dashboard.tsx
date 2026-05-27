@@ -1,7 +1,5 @@
-import { useEffect, useState } from "react";
-
+import { useEffect, useRef, useState } from "react";
 import { apiFetch } from "../lib/api";
-
 import type { Position } from "../types/position";
 
 type RankingUser = {
@@ -10,116 +8,135 @@ type RankingUser = {
   balance: number;
 };
 
+type ViewMode = "ranking" | "open" | "history";
+
 export default function Dashboard() {
-  const [openPositions, setOpenPositions] = useState<Position[]>([]);
-
-  const [historyPositions, setHistoryPositions] =
-    useState<Position[]>([]);
-
+  const [view, setView] = useState<ViewMode>("ranking");
+  const currentViewRef = useRef<ViewMode>("ranking");
   const [ranking, setRanking] = useState<RankingUser[]>([]);
+  const [openPositions, setOpenPositions] = useState<Position[]>([]);
+  const [historyPositions, setHistoryPositions] = useState<Position[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchOpenPositions();
-    fetchHistory();
-    fetchRanking();
+    loadView("ranking");
+
+    const handler = () => {
+      loadView(currentViewRef.current);
+    };
+
+    window.addEventListener("market-updated", handler);
+
+    return () => window.removeEventListener("market-updated", handler);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function fetchOpenPositions() {
-    const res = await apiFetch("/positions/open");
+  async function loadView(target: ViewMode) {
+    setView(target);
+    currentViewRef.current = target;
+    setLoading(true);
+    setError(null);
 
-    const data = await res.json();
+    try {
+      if (target === "ranking") {
+        const response = await apiFetch("/ranking");
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data?.message || "Failed to load ranking");
+        }
+        setRanking(data);
+      }
 
-    setOpenPositions(data);
-  }
+      if (target === "open") {
+        const response = await apiFetch("/positions/open");
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data?.message || "Failed to load open positions");
+        }
+        setOpenPositions(data);
+      }
 
-  async function fetchHistory() {
-    const res = await apiFetch("/positions/history");
-
-    const data = await res.json();
-
-    setHistoryPositions(data);
-  }
-
-  async function fetchRanking() {
-    const res = await apiFetch("/ranking");
-
-    const data = await res.json();
-
-    setRanking(data);
+      if (target === "history") {
+        const response = await apiFetch("/positions/history");
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data?.message || "Failed to load history");
+        }
+        setHistoryPositions(data);
+      }
+    } catch (dashboardError) {
+      setError(dashboardError instanceof Error ? dashboardError.message : "Failed to load data");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h1>Steam Stock Game</h1>
-
-      <hr />
-
-      <h2>Open Positions</h2>
-
-      {openPositions.map((position) => (
-        <div
-          key={position.id}
-          style={{
-            border: "1px solid gray",
-            marginBottom: "10px",
-            padding: "10px",
-          }}
-        >
-          <div>AppID: {position.steam_app_id}</div>
-
-          <div>Amount: {position.amount}</div>
-
-          <div>Buy Price: {position.buy_price}</div>
-
-          <div>
-            Auto Sell Time: {position.auto_sell_time}
-          </div>
+    <section className="card footer-panel">
+      <div className="card-header">
+        <div>
+          <p className="eyebrow">Footer Panel</p>
+          <h2>{view === "ranking" ? "Ranking" : view === "open" ? "購入中の履歴" : "履歴"}</h2>
         </div>
-      ))}
-
-      <hr />
-
-      <h2>History</h2>
-
-      {historyPositions.map((position) => (
-        <div
-          key={position.id}
-          style={{
-            border: "1px solid gray",
-            marginBottom: "10px",
-            padding: "10px",
-          }}
-        >
-          <div>AppID: {position.steam_app_id}</div>
-
-          <div>Amount: {position.amount}</div>
-
-          <div>Buy Total: {position.buy_total}</div>
-
-          <div>Sell Total: {position.sell_total}</div>
+        <div className="button-row">
+          <button className={view === "ranking" ? "primary-button" : "secondary-button"} type="button" onClick={() => loadView("ranking")}>Ranking</button>
+          <button className={view === "open" ? "primary-button" : "secondary-button"} type="button" onClick={() => loadView("open")}>購入中の履歴</button>
+          <button className={view === "history" ? "primary-button" : "secondary-button"} type="button" onClick={() => loadView("history")}>履歴</button>
         </div>
-      ))}
+      </div>
 
-      <hr />
+      {loading && <p className="muted">Loading...</p>}
+      {error && <p className="error-text">{error}</p>}
 
-      <h2>Ranking</h2>
-
-      {ranking.map((user, index) => (
-        <div
-          key={user.id}
-          style={{
-            border: "1px solid gray",
-            marginBottom: "10px",
-            padding: "10px",
-          }}
-        >
-          <div>Rank: {index + 1}</div>
-
-          <div>Name: {user.player_name}</div>
-
-          <div>Balance: {user.balance}</div>
+      {!loading && !error && view === "ranking" && (
+        <div className="list-grid">
+          {ranking.length === 0 ? (
+            <p className="muted">ランキングはまだありません。</p>
+          ) : (
+            ranking.map((user, index) => (
+              <article key={user.id} className="list-item">
+                <strong>#{index + 1} {user.player_name}</strong>
+                <span>Balance: {user.balance}</span>
+              </article>
+            ))
+          )}
         </div>
-      ))}
-    </div>
+      )}
+
+      {!loading && !error && view === "open" && (
+        <div className="list-grid">
+          {openPositions.length === 0 ? (
+            <p className="muted">購入中のポジションはありません。</p>
+          ) : (
+            openPositions.map((position) => (
+              <article key={position.id} className="list-item">
+                <strong>AppID: {position.steam_app_id}</strong>
+                <span>Amount: {position.amount}</span>
+                <span>Buy Price: {position.buy_price}</span>
+                <span>Auto Sell: {position.auto_sell_time}</span>
+              </article>
+            ))
+          )}
+        </div>
+      )}
+
+      {!loading && !error && view === "history" && (
+        <div className="list-grid">
+          {historyPositions.length === 0 ? (
+            <p className="muted">履歴はまだありません。</p>
+          ) : (
+            historyPositions.map((position) => (
+              <article key={position.id} className="list-item">
+                <strong>AppID: {position.steam_app_id}</strong>
+                <span>Amount: {position.amount}</span>
+                <span>Buy Total: {position.buy_total}</span>
+                <span>Sell Total: {position.sell_total}</span>
+              </article>
+            ))
+          )}
+        </div>
+      )}
+    </section>
   );
 }
