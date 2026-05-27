@@ -1,4 +1,6 @@
+/*
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { apiFetch } from "../lib/api";
 import type { Position } from "../types/position";
 
@@ -11,6 +13,7 @@ type RankingUser = {
 type ViewMode = "ranking" | "open" | "history";
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const [view, setView] = useState<ViewMode>("ranking");
   const currentViewRef = useRef<ViewMode>("ranking");
   const [ranking, setRanking] = useState<RankingUser[]>([]);
@@ -18,13 +21,36 @@ export default function Dashboard() {
   const [historyPositions, setHistoryPositions] = useState<Position[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [sellingIds, setSellingIds] = useState<number[]>([]);
+
+  async function sellPosition(id: number) {
+    if (sellingIds.includes(id)) return;
+    setSellingIds((s) => [...s, id]);
+    setError(null);
+
+    try {
+      const response = await apiFetch(`/positions/${id}/sell`, { method: "POST" });
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(data?.message || data?.error || "Failed to sell position");
+      }
+
+      // refresh lists
+      window.dispatchEvent(new CustomEvent("market-updated"));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setSellingIds((s) => s.filter((x) => x !== id));
+    }
+  }
 
   useEffect(() => {
     loadView("ranking");
 
     const handler = () => {
-      loadView(currentViewRef.current);
-    };
+        loadView(currentViewRef.current);
+      };
 
     window.addEventListener("market-updated", handler);
 
@@ -79,10 +105,10 @@ export default function Dashboard() {
           <p className="eyebrow">Footer Panel</p>
           <h2>{view === "ranking" ? "Ranking" : view === "open" ? "購入中の履歴" : "履歴"}</h2>
         </div>
-        <div className="button-row">
-          <button className={view === "ranking" ? "primary-button" : "secondary-button"} type="button" onClick={() => loadView("ranking")}>Ranking</button>
-          <button className={view === "open" ? "primary-button" : "secondary-button"} type="button" onClick={() => loadView("open")}>購入中の履歴</button>
-          <button className={view === "history" ? "primary-button" : "secondary-button"} type="button" onClick={() => loadView("history")}>履歴</button>
+          <div className="button-row">
+          <button className={view === "ranking" ? "primary-button" : "secondary-button"} type="button" onClick={() => navigate('/ranking')}>Ranking</button>
+          <button className={view === "open" ? "primary-button" : "secondary-button"} type="button" onClick={() => navigate('/open')}>購入中の履歴</button>
+          <button className={view === "history" ? "primary-button" : "secondary-button"} type="button" onClick={() => navigate('/history')}>履歴</button>
         </div>
       </div>
 
@@ -115,6 +141,16 @@ export default function Dashboard() {
                 <span>Amount: {position.amount}</span>
                 <span>Buy Price: {position.buy_price}</span>
                 <span>Auto Sell: {position.auto_sell_time}</span>
+                <div style={{ marginTop: 8 }}>
+                  <button
+                    className="secondary-button"
+                    type="button"
+                    onClick={() => sellPosition(position.id)}
+                    disabled={sellingIds.includes(position.id)}
+                  >
+                    {sellingIds.includes(position.id) ? "Selling..." : "Sell Now"}
+                  </button>
+                </div>
               </article>
             ))
           )}

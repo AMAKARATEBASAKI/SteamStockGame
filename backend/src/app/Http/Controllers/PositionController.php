@@ -71,4 +71,50 @@ class PositionController extends Controller
 
         return response()->json($positions);
     }
+
+    public function sell(Request $request, $id)
+    {
+        $user = $request->user();
+
+        try {
+            DB::transaction(function () use ($user, $id) {
+                $position = Position::whereKey($id)
+                    ->lockForUpdate()
+                    ->first();
+
+                if (!$position) {
+                    abort(404, 'Position not found');
+                }
+
+                if ($position->user_id !== $user->id) {
+                    abort(403, 'Forbidden');
+                }
+
+                if ($position->status !== 'open') {
+                    abort(400, 'Position is not open');
+                }
+
+                $steamService = new SteamService();
+                $priceService = new PriceService();
+
+                $players = $steamService->getPlayerCount($position->steam_app_id);
+                $sellPrice = $priceService->calculate($players);
+                $total = $sellPrice * $position->amount;
+
+                // credit user
+                $user->increment('balance', $total);
+
+                $position->update([
+                    'selling_price' => $sellPrice,
+                    'sell_total' => $total,
+                    'sell_time' => now(),
+                    'status' => 'closed',
+                ]);
+            });
+
+            return response()->json(['status' => 'ok']);
+        } catch (\Throwable $e) {
+            abort(500, 'Failed to sell position');
+        }
+    }
 }

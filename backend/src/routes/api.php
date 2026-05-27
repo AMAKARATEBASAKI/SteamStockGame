@@ -22,6 +22,8 @@ Route::middleware('auth:sanctum')->get('/me', function (Request $request) {
 
 Route::middleware('auth:sanctum')->post('/positions/buy', [PositionController::class, 'buy']);
 
+Route::middleware('auth:sanctum')->post('/positions/{id}/sell', [PositionController::class, 'sell']);
+
 Route::middleware('auth:sanctum')
     ->get('/positions/open', [PositionController::class, 'open']);
 
