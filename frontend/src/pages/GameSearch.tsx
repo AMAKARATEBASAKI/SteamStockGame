@@ -4,6 +4,7 @@ import { apiFetch } from "../lib/api";
 type GameInfo = {
   appid: string;
   name: string;
+  player_count?: number;
 };
 
 function toDatetimeLocal(value: Date) {
@@ -108,45 +109,56 @@ export default function GameSearch() {
           <input
             type="text"
             value={appid}
-            onChange={(event) => setAppid(event.target.value)}
+            onChange={(event) => {
+              setAppid(event.target.value);
+              setGame(null);
+              setMessage(null);
+            }}
             placeholder="2246340"
           />
         </label>
+
+        {!game && <p className="muted">まず AppID を検索すると、購入フォームが表示されます。</p>}
 
         {game && (
           <div className="result-box">
             <strong>{game.name}</strong>
             <span>AppID: {game.appid}</span>
+            <span>現在の同時接続数: {game.player_count ?? "-"}</span>
           </div>
         )}
 
-        <div className="grid-two">
-          <label className="field">
-            <span>Amount</span>
-            <input
-              type="number"
-              min={1}
-              value={amount}
-              onChange={(event) => setAmount(Number(event.target.value) || 1)}
-            />
-          </label>
+        {game && (
+          <div className="grid-two">
+            <label className="field">
+              <span>Amount</span>
+              <input
+                type="number"
+                min={1}
+                value={amount}
+                onChange={(event) => setAmount(Number(event.target.value) || 1)}
+              />
+            </label>
 
-          <label className="field">
-            <span>Auto sell time</span>
-            <input
-              type="datetime-local"
-              value={autoSellTime}
-              onChange={(event) => setAutoSellTime(event.target.value)}
-            />
-          </label>
-        </div>
+            <label className="field">
+              <span>Auto sell time</span>
+              <input
+                type="datetime-local"
+                value={autoSellTime}
+                onChange={(event) => setAutoSellTime(event.target.value)}
+              />
+            </label>
+          </div>
+        )}
 
         {error && <p className="error-text">{error}</p>}
         {message && <p className="success-text">{message}</p>}
 
-        <button className="primary-button" type="button" onClick={buyPosition} disabled={buying || !canBuy}>
-          {buying ? "Buying..." : "Buy Position"}
-        </button>
+        {game && (
+          <button className="primary-button" type="button" onClick={buyPosition} disabled={buying || !canBuy}>
+            {buying ? "Buying..." : "Buy Position"}
+          </button>
+        )}
       </div>
     </section>
   );

@@ -46,8 +46,7 @@ function App() {
     <div className="app-shell">
       <header className="topbar">
         <div>
-          <p className="eyebrow">Steam Stock Game</p>
-          <h1>Trading Console</h1>
+          <p className="eyebrow" onClick={() => navigate("/")}>Steam Stock Game</p>
         </div>
         <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
           {me && (

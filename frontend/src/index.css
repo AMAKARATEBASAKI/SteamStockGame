@@ -102,11 +102,25 @@ pre {
   right: 0;
   bottom: 0;
   padding: 0 24px 20px;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+  max-width: 1180px;
+  margin: 0 auto;
+  background: linear-gradient(180deg, rgba(8, 17, 31, 0) 0%, rgba(8, 17, 31, 0.65) 55%, rgba(8, 17, 31, 0.9) 100%);
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
   pointer-events: none;
 }
 
 .footer-shell > * {
   pointer-events: auto;
+}
+
+.footer-shell .primary-button,
+.footer-shell .secondary-button {
+  min-width: 130px;
 }
 
 .card,
@@ -232,6 +246,15 @@ pre {
 
   .footer-shell {
     padding-inline: 12px;
+    gap: 8px;
+    justify-content: stretch;
+  }
+
+  .footer-shell .primary-button,
+  .footer-shell .secondary-button {
+    flex: 1;
+    min-width: 0;
+    padding: 0.8rem 0.7rem;
   }
 
   .app-shell {
