@@ -11,6 +11,29 @@ function App() {
   const [me, setMe] = useState<{ player_name: string; balance: number } | null>(null);
   const navigate = useNavigate();
 
+  async function fetchMe(currentToken = token) {
+    if (!currentToken) {
+      setMe(null);
+      return;
+    }
+
+    try {
+      const res = await fetch("http://localhost:8080/api/me", {
+        headers: { Authorization: `Bearer ${currentToken}` },
+      });
+
+      if (!res.ok) {
+        setMe(null);
+        return;
+      }
+
+      const data = await res.json();
+      setMe({ player_name: data.player_name || data.name || "Player", balance: data.balance || 0 });
+    } catch {
+      setMe(null);
+    }
+  }
+
   useEffect(() => {
     const syncToken = () => {
       setToken(localStorage.getItem("token"));
@@ -21,21 +44,16 @@ function App() {
   }, []);
 
   useEffect(() => {
-    async function fetchMe() {
-      if (!token) return setMe(null);
-      try {
-        const res = await fetch("http://localhost:8080/api/me", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!res.ok) return setMe(null);
-        const data = await res.json();
-        setMe({ player_name: data.player_name || data.name || 'Player', balance: data.balance || 0 });
-      } catch {
-        setMe(null);
-      }
-    }
-
     fetchMe();
+  }, [token]);
+
+  useEffect(() => {
+    const handleMarketUpdated = () => {
+      fetchMe();
+    };
+
+    window.addEventListener("market-updated", handleMarketUpdated);
+    return () => window.removeEventListener("market-updated", handleMarketUpdated);
   }, [token]);
 
   if (!token) {

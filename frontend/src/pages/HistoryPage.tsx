@@ -47,7 +47,7 @@ export default function HistoryPage() {
                 <strong>AppID: {position.steam_app_id}</strong>
                 <span>Amount: {position.amount}</span>
                 <span>Buy Total: {position.buy_total}</span>
-                <span>Sell Total: {position.sell_total}</span>
+                <span>Sell Total: {position.sell_total ?? "-"}</span>
               </article>
             ))
           )}

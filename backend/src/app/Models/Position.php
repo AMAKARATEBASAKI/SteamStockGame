@@ -14,6 +14,9 @@ class Position extends Model
         'buy_total',
         'buy_time',
         'auto_sell_time',
+        'selling_price',
+        'sell_total',
+        'sell_time',
         'status',
     ];
 }

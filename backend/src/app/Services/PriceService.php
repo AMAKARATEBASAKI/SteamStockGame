@@ -6,6 +6,6 @@ class PriceService
 {
     public function calculate($players)
     {
-        return (int) ($players / 100);
+        return (int) $players;
     }
 }
