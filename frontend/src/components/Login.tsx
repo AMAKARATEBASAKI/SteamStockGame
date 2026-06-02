@@ -49,7 +49,7 @@ export default function Login({ onSuccess }: LoginProps) {
 			<div className="auth-card">
 				<p className="eyebrow">Steam Stock Game</p>
 				<h1>ログイン</h1>
-				<p className="muted">API を使うにはログインしてトークンを保持してください。</p>
+				<p className="muted"></p>
 
 				<form className="form-grid" onSubmit={handleSubmit}>
 					<label className="field">

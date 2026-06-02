@@ -3,6 +3,10 @@
         "/^docker compose exec backend sh -c 'tail -n 300 /var/www/storage/logs/laravel\\.log'$/": {
             "approve": true,
             "matchCommandLine": true
+        },
+        "/^docker compose restart frontend$/": {
+            "approve": true,
+            "matchCommandLine": true
         }
     }
 }

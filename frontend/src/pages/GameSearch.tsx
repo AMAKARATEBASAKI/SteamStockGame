@@ -95,8 +95,8 @@ export default function GameSearch() {
     <section className="card">
       <div className="card-header">
         <div>
-          <p className="eyebrow">Market</p>
-          <h2>Game Search & Buy</h2>
+          <p className="eyebrow"></p>
+          <h2>ゲーム検索</h2>
         </div>
         <button className="secondary-button" type="button" onClick={searchGame} disabled={loading}>
           {loading ? "Searching..." : "Search"}
