@@ -23,6 +23,10 @@ type AuthResponse = {
   message?: string;
 };
 
+type AuthSuccessResponse = AuthResponse & {
+  token: string;
+};
+
 function getJapaneseAuthMessage(status: number, bodyText: string) {
   if (status === 401) {
     return "メールアドレスまたはパスワードが違います。";
@@ -87,7 +91,7 @@ async function requestAuth(path: string, body: { email: string; password: string
     throw new Error("トークンの取得に失敗しました。");
   }
 
-  return data;
+  return data as AuthSuccessResponse;
 }
 
 export function loginUser(body: { email: string; password: string }) {
@@ -132,5 +136,5 @@ export async function registerUser(body: { name: string; email: string; password
     throw new Error("トークンの取得に失敗しました。");
   }
 
-  return data;
+  return data as AuthSuccessResponse;
 }
