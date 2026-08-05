@@ -18,6 +18,14 @@ SteamStockGame は、Steam のゲーム情報を使って株のように売買�
 docker compose up -d
 ```
 
+testアカウント
+```email
+test@example.com
+```
+```password
+password123
+```
+
 フロントエンド
 ```text
 http://localhost:5173
