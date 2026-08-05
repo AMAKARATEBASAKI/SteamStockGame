@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { API_URL } from "../lib/api";
+import { loginUser } from "../lib/api";
 
 type LoginProps = {
 	onSuccess: (token: string) => void;
@@ -17,28 +17,11 @@ export default function Login({ onSuccess }: LoginProps) {
 		setError(null);
 
 		try {
-			const response = await fetch(`${API_URL}/login`, {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({ email, password }),
-			});
-
-			const data = await response.json();
-
-			if (!response.ok) {
-				throw new Error(data?.error || "Login failed");
-			}
-
-			if (!data.token) {
-				throw new Error("Token was not returned from the server");
-			}
-
+			const data = await loginUser({ email, password });
 			localStorage.setItem("token", data.token);
 			onSuccess(data.token);
 		} catch (loginError) {
-			setError(loginError instanceof Error ? loginError.message : "Login failed");
+			setError(loginError instanceof Error ? loginError.message : "メールアドレスまたはパスワードが違います。");
 		} finally {
 			setLoading(false);
 		}
@@ -49,7 +32,7 @@ export default function Login({ onSuccess }: LoginProps) {
 			<div className="auth-card">
 				<p className="eyebrow">Steam Stock Game</p>
 				<h1>ログイン</h1>
-				<p className="muted"></p>
+				<p className="muted">登録したメールアドレスとパスワードを入力してください。</p>
 
 				<form className="form-grid" onSubmit={handleSubmit}>
 					<label className="field">
@@ -58,7 +41,7 @@ export default function Login({ onSuccess }: LoginProps) {
 							type="email"
 							value={email}
 							onChange={(event) => setEmail(event.target.value)}
-							placeholder="test@example.com"
+							placeholder="email"
 							autoComplete="email"
 							required
 						/>
