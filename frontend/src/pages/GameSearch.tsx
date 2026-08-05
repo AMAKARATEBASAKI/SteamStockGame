@@ -14,7 +14,7 @@ function toDatetimeLocal(value: Date) {
 }
 
 export default function GameSearch() {
-  const [appid, setAppid] = useState("");
+  const [appid, setAppid] = useState("2246340");
   const [game, setGame] = useState<GameInfo | null>(null);
   const [amount, setAmount] = useState(1);
   const [autoSellTime, setAutoSellTime] = useState(() =>
@@ -114,7 +114,7 @@ export default function GameSearch() {
               setGame(null);
               setMessage(null);
             }}
-            placeholder="2246340"
+            placeholder="steamのゲームページのurlから取得できます"
           />
         </label>
 

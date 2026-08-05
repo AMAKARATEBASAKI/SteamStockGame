@@ -1,5 +1,6 @@
 import GameSearch from "./pages/GameSearch";
 import Login from "./components/Login";
+import Register from "./components/Register";
 import { useEffect, useState } from "react";
 import { Routes, Route, useNavigate } from "react-router-dom";
 import RankingPage from "./pages/RankingPage";
@@ -57,7 +58,13 @@ function App() {
   }, [token]);
 
   if (!token) {
-    return <Login onSuccess={setToken} />;
+    return (
+      <Routes>
+        <Route path="/login" element={<Login onSuccess={setToken} />} />
+        <Route path="/register" element={<Register onSuccess={setToken} />} />
+        <Route path="*" element={<Login onSuccess={setToken} />} />
+      </Routes>
+    );
   }
 
   return (

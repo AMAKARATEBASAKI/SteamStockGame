@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { loginUser } from "../lib/api";
+import { Link } from "react-router-dom";
 
 type LoginProps = {
 	onSuccess: (token: string) => void;
@@ -64,6 +65,10 @@ export default function Login({ onSuccess }: LoginProps) {
 					<button className="primary-button" type="submit" disabled={loading}>
 						{loading ? "Logging in..." : "Login"}
 					</button>
+
+					<div style={{ marginTop: 12 }}>
+						<Link to="/register" style={{ color: 'red' }}>新規登録はこちら</Link>
+					</div>
 				</form>
 			</div>
 		</section>
